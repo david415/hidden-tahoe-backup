@@ -1,0 +1,73 @@
+{
+  "type" : "TahoeLAFSBackupManifest",
+  "name" : "MyTailsBackupManifest",
+  "description" : "example Tails Persistent volume restore/backup manifest",
+  "version" : 1,
+  "fields" : {
+    "snapshotAliases" : {
+      "tails_backup" : "URT:DIR2:xxxxxxxxxxxxxxxxxxxxxxxxxx:yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+    },
+    "introducerNodes" : ["pb://TubIDxxxxxxxxxxxxxxxxxxxxxxxxxxx@bunnyfufufufufuf.onion:5432/introducer"],
+    "storageNodes" : {
+      "StorageNode1": "pb://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@bbbbbbbbbbbbbbbb.onion:1234/cccccccccccccccccccccccccccccccc",
+      "StorageNode2": "pb://bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb@aaaaaaaaaaaaaaaa.onion:2345/dddddddddddddddddddddddddddddddd",
+      "StorageNode3": "pb://cccccccccccccccccccccccccccccccc@bbbbbbbbbbbbbbbb.onion:3452/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "StorageNode4": "pb://cccccccccccccccccccccccccccccccd@aaaaaaaaaaaaaaac.onion:3453/daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "StorageNode5": "pb://ccccccccccccccccccccccccccccccce@bbbbbbbbbbbbbbbd.onion:3454/caaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "StorageNode6": "pb://cccccccccccccccccccccccccccccccf@bbbbbbbbbbbbbbbe.onion:3455/baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "tasks" : [
+      {
+         "remoteSnapshot" : "dotssh",
+         "backupAlias" : "tails_backup",
+         "restoreVersion" : "Latest",
+         "localDirectory" : "/live/persistence/TailsData_unlocked/openssh-client"
+      },
+      {
+         "remoteSnapshot" : "dotgnupg",
+         "backupAlias" : "tails_backup",
+         "restoreVersion" : "Latest",
+         "localDirectory" : "/live/persistence/TailsData_unlocked/gnupg"
+      },
+      {
+         "remoteSnapshot" : "Persistent",
+         "backupAlias" : "tails_backup",
+         "restoreVersion" : "Latest",
+         "localDirectory" : "/live/persistence/TailsData_unlocked/Persistent",
+         "excludes" : [
+           "ansible-tahoe-base*",
+           "incidents*",
+           "twistd.log",
+           "projects*",
+           "tahoe-lafs*",
+           "Music*",
+           "virtenv-*",
+           "virtualenv-*",
+           "go*",
+           "*.iso"
+         ]
+      },
+      {
+         "remoteSnapshot" : "nm-system-connections",
+         "backupAlias" : "tails_backup",
+         "restoreVersion" : "Latest",
+         "localDirectory" : "/live/persistence/TailsData_unlocked/nm-system-connections"
+      },
+      {
+         "remoteSnapshot" : "bookmarks",
+         "backupAlias" : "tails_backup",
+         "restoreVersion" : "Latest",
+         "localDirectory" : "/live/persistence/TailsData_unlocked/bookmarks"
+      }
+    ],
+    "tails_dotfiles" : {
+      ".bashrc": "/home/amnesia/Persistent/.bashrc",
+      ".config": "/home/amnesia/Persistent/.config",
+      ".gconf": "/home/amnesia/Persistent/.gconf",
+      ".msmtprc": "/home/amnesia/Persistent/.msmtprc",
+      ".mutt": "/home/amnesia/Persistent/.mutt",
+      ".muttrc": "/home/amnesia/Persistent/.muttrc",
+      ".tahoe": "/home/amnesia/Persistent/.tahoe"
+    }
+  }
+}
