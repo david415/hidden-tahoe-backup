@@ -5,7 +5,7 @@
   "version" : 1,
   "fields" : {
     "snapshotAliases" : {
-      "tails_backup" : "URT:DIR2:xxxxxxxxxxxxxxxxxxxxxxxxxx:yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+      "tails_backup" : "URI:DIR2:xxxxxxxxxxxxxxxxxxxxxxxxxx:yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
     },
     "introducerNodes" : ["pb://TubIDxxxxxxxxxxxxxxxxxxxxxxxxxxx@bunnyfufufufufuf.onion:5432/introducer"],
     "storageNodes" : {
