@@ -20,9 +20,16 @@ def decrypt(ciphertext, nonce, key):
     return box.decrypt(ciphertext, nonce)
 
 def promptlyEncryptFile(filename):
-    """Prompt user for a passphrase use the sha256 hash of that as the key...
+    """
+    Encrypt file and return ciphertext.
+    Prompt twice to set a passphrase/key.
     """
     passphrase = getpass.getpass("Enter passphrase:")
+    passphrase2 = getpass.getpass("Enter passphrase:")
+    if passphrase != passphrase2:
+        print "passphrases don't match"
+        sys.exit(-1)
+
     key = nacl.hash.sha256(passphrase, encoder=nacl.encoding.RawEncoder)
 
     # XXX never reuse a nonce; is this good enough? nope.
@@ -36,7 +43,9 @@ def promptlyEncryptFile(filename):
     return ciphertext
 
 def promptlyDecryptFile(filename):
-    """Prompt user for a passphrase use the sha256 hash of that as the key...
+    """
+    Decrypt file and return plaintext.
+    Prompt for the passphrase.
     """
     passphrase = getpass.getpass("Enter passphrase:")
     key = nacl.hash.sha256(passphrase, encoder=nacl.encoding.RawEncoder)

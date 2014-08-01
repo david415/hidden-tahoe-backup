@@ -18,8 +18,8 @@ def main():
     parser.add_argument('--stop', dest='stop', default=False, action="store_true", help="stop Tahoe-LAFS client")
     parser.add_argument('--restore', dest='restore', default=False, action="store_true", help="restore")
     parser.add_argument('--backup', dest='backup', default=False, action="store_true", help="backup")
-    parser.add_argument("--manifest", dest='manifest', help="Backup manifest", default=None)
-    parser.add_argument("--node-directory", dest='nodeDir', help="Specify which Tahoe node directory should be used.", default=None)
+    parser.add_argument('--manifest', dest='manifest', help="Backup manifest", default=None)
+    parser.add_argument('--node-directory', dest='nodeDir', help="Specify which Tahoe node directory should be used.", default=None)
     args = parser.parse_args()
 
     if args.start is True and args.stop is True:

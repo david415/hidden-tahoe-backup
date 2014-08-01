@@ -63,7 +63,7 @@ specifies the Tahoe-LAFS snapshot locations and which local directories to resto
 ##### why not just use gpg in symmetric mode to encrypt the backup manifest?
 
 **gpg** is terribly powerful as well as terrible. **gpg --symmetric** does not MAC the ciphertext!
-Instead I am going to use **DJB's NaCl SecretBox** to verifiably encrypt/decrypt the backup manifests.
+Instead I using **DJB's NaCl SecretBox** to verifiably encrypt/decrypt the backup manifests.
 
 
 #### why Tails?
@@ -128,7 +128,7 @@ https://tahoe-lafs.org/trac/tahoe-lafs/ticket/517
 #### development style
 
 I'm using an iterative approach; that is a polite way of saying
-that we will soon improve the code quality over time...
+that I will soon improve the code quality over time...
 but right now focus is on producing a **working proof of concept!**
 
 This backup system is currently built by wrapping the "tahoe cp" and "tahoe backup" commands...
@@ -136,9 +136,9 @@ however in the future this "backup manifest" functionality could be implemented
 directly in the Tahoe-LAFS gateway node.
 
 These "backup manifests" are essentially an alternate configuration format for Tahoe-LAFS
-AND metadata for performing backup and restore operations.
+with metadata for performing backup and restore operations.
 
-I'm looking forward for implementing several other Tahoe-LAFS backup systems for Tails.
+I'm looking forward to implementing several other Tahoe-LAFS backup systems for Tails.
 I think they will each have their own advantages. Clearly this system's advantage will be
 the ability to reduce the complexity of data retrieval to a passphrase and information about
 where to find the encrypted manifest.
