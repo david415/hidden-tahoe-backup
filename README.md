@@ -60,6 +60,12 @@ decrypt the blob then the resulting information is used to setup a Tahoe-LAFS co
 specifies the Tahoe-LAFS snapshot locations and which local directories to restore the data to.
 
 
+##### why not just use gpg in symmetric mode to encrypt the backup manifest?
+
+**gpg** is terribly powerful as well as terrible. **gpg --symmetric** does not MAC the ciphertext!
+Instead I am going to use **DJB's NaCl SecretBox** to verifiably encrypt/decrypt the backup manifests.
+
+
 #### why Tails?
 
 Tails being a security hardened and easy to use Linux distribution is an excellent platform
@@ -72,16 +78,17 @@ frequent software security updates, expert peer review etc.
 
 #### why Tahoe-LAFS?
 
+##### verified end to end crypto
 Tahoe Least Authoratative File System is a distributed cryptographic file
-storage system which offers users very powerful features including verified end to end crypto,
-data redundancy and a cryptographic capabilities model. Among the many features
-it is worth mentioning that because of the verified end to end crypto,
+storage system which offers users very powerful features for the user.
+Among the many features it is worth mentioning that because of the verified end to end crypto,
 the security guarantees that Tahoe-LAFS provides are qualitatively different
 than those of cloud storage providers such as Google Drive, Dropbox and Amazon S3.
 These cloud storage services can do their best to prevent their servers from getting hacked...
 However if an attacker gains access they will have access to the data in plaintext.
 This is in direct contrast to Tahoe-LAFS storage servers which only see ciphertext.
 
+##### data redundancy & censorship resistance
 Additionally Tahoe-LAFS has flexible RAID-like data redundancy that implies censorship resistance:
 If K out of N storage nodes are needed to reconstruct the data set then ((N - K) + 1) storage
 nodes would have to be taken out in order to effectively censor content on the onion grid.
@@ -90,24 +97,51 @@ In the context of defeating censorship of politically sensitive material it woul
 geopolitical distribution of storage servers such that at least K storage servers would be protected a bit more
 than the rest of the grid. In some contexts this could mean operating at least K storage nodes under the territory of allied governments.
 
+##### cryptographic capabilities model
+Tahoe-LAFS has a powerful capabilities model which essentially implements a distributed access control system.
+Users may choose on a per file basis if they would like to share a VerifyOnly, ReadOnly or ReadWrite cryptographic
+capability with another user. Knowledge of one file does not imply any knowledge of other files that might be stored
+in the grid.
 
-For more technical details about Tahoe-LAFS:
+
+#### more technical details:
 
 * read my favorite white paper about Tahoe-LAFS: http://www.laser.dist.unige.it/Repository/IPI-1011/FileSystems/TahoeDFS.pdf
-
 * Tahoe-LAFS website: https://tahoe-lafs.org/trac/tahoe-lafs
-
-
 * Tails website: https://tails.boum.org/
-
 * Tor project website: https://www.torproject.org/
+* DJB's NaCl crypto library: http://nacl.cr.yp.to/
+* libsodium fork of NaCl: https://github.com/jedisct1/libsodium
 
-
-#### requirements
+#### software dependencies
 
 * Tahoe-LAFS
 * Torsocks
 * tor
+* pynacl
+* libsodium
+
+The Torsocks dependency will be removed once my native Tor integration is merged and resolves Tahoe-LAFS trac ticket 517:
+https://tahoe-lafs.org/trac/tahoe-lafs/ticket/517
+
+
+#### development style
+
+I'm using an iterative approach; that is a polite way of saying
+that we will soon improve the code quality over time...
+but right now focus is on producing a **working proof of concept!**
+
+This backup system is currently built by wrapping the "tahoe cp" and "tahoe backup" commands...
+however in the future this "backup manifest" functionality could be implemented
+directly in the Tahoe-LAFS gateway node.
+
+These "backup manifests" are essentially an alternate configuration format for Tahoe-LAFS
+AND metadata for performing backup and restore operations.
+
+I'm looking forward for implementing several other Tahoe-LAFS backup systems for Tails.
+I think they will each have their own advantages. Clearly this system's advantage will be
+the ability to reduce the complexity of data retrieval to a passphrase and information about
+where to find the encrypted manifest.
 
 
 #### suggestions and feature requests welcome
