@@ -3,6 +3,7 @@
 import nacl.secret
 import nacl.utils
 import nacl.hash
+import nacl.encoding
 import getpass
 import binascii
 import argparse
@@ -12,57 +13,42 @@ import re
 
 def encrypt(plaintext, nonce, key):
     box = nacl.secret.SecretBox(key)
-    return box.encrypt(plaintext, nonce)
+    return box.encrypt(plaintext, nonce, encoder=nacl.encoding.Base64Encoder)
 
 def decrypt(ciphertext, nonce, key):
     box = nacl.secret.SecretBox(key)
     return box.decrypt(ciphertext, nonce)
 
-def encryptFile(filename):
-    """Prompt user for a passphrase and use that as key to encrypt the file
+def promptlyEncryptFile(filename):
+    """Prompt user for a passphrase use the sha256 hash of that as the key...
     """
-    if os.path.isfile(filename + '.secretbox'):
-        print "%s already exists" % (filename + '.secretbox')
-        sys.exit(-1)
-
     passphrase = getpass.getpass("Enter passphrase:")
     key = nacl.hash.sha256(passphrase, encoder=nacl.encoding.RawEncoder)
 
     # XXX never reuse a nonce; is this good enough? nope.
     nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
-
+    
     plaintext_fh = open(filename, 'r')
     plaintext = plaintext_fh.read()
     plaintext_fh.close()
 
     ciphertext = encrypt(plaintext, nonce, key)
-    fh_ciphertext = open(filename + '.secretbox', 'w')
-    fh_ciphertext.write(ciphertext)
-    fh_ciphertext.close()
+    return ciphertext
 
-def decryptFile(filename):
-
-    if not filename.endswith('.secretbox'):
-        print "Filename must end in .secretbox"
-        sys.exit(-1)
-
-    plaintext_file = url = re.sub('\.secretbox$', '', filename)
-
-    if os.path.isfile(plaintext_file):
-        print "%s already exists" % (plaintext_file,)
-        sys.exit(-1)
-
+def promptlyDecryptFile(filename):
+    """Prompt user for a passphrase use the sha256 hash of that as the key...
+    """
     passphrase = getpass.getpass("Enter passphrase:")
     key = nacl.hash.sha256(passphrase, encoder=nacl.encoding.RawEncoder)
+
     fh = open(filename, 'r')
-    nonce = fh.read(24)
-    ciphertext = fh.read()
+    bin_ciphertext = binascii.a2b_base64(fh.read())
     fh.close()
+    nonce = bin_ciphertext[0:24]
+    ciphertext = bin_ciphertext[24:]
 
     plaintext = decrypt(ciphertext, nonce, key)
-    fh_plaintext = open(plaintext_file, 'w')
-    fh_plaintext.write(plaintext)
-    fh_plaintext.close()
+    return plaintext
 
 
 def main():
@@ -78,11 +64,39 @@ def main():
         parser.print_help()
         return -1
 
-    for file in files:
+    if not args.encrypt and not args.decrypt:
+        print "Must specify either encrypt or decrypt."
+        parser.print_help()
+        return -1
+
+    for filename in files:
         if args.decrypt:
-            decryptFile(file)
+            if not filename.endswith('.secretbox'):
+                print "Filename must end in .secretbox"
+                sys.exit(-1)
+
+            plaintext_file = url = re.sub('\.secretbox$', '', filename)
+
+            if os.path.isfile(plaintext_file):
+                print "%s already exists." % plaintext_file
+                sys.exit(-1)
+
+            plaintext = promptlyDecryptFile(filename)
+
+            fh_plaintext = open(plaintext_file, 'w')
+            fh_plaintext.write(plaintext)
+            fh_plaintext.close()
         else:
-            encryptFile(file)
+            ciphertext_file = filename + '.secretbox'
+            if os.path.isfile(ciphertext_file):
+                print "%s already exists" % (ciphertext_file,)
+                sys.exit(-1)
+
+            ciphertext = promptlyEncryptFile(filename)
+
+            fh_ciphertext = open(ciphertext_file, 'w')
+            fh_ciphertext.write(ciphertext)
+            fh_ciphertext.close()
 
     return 0
 

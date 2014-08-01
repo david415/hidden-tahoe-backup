@@ -3,6 +3,7 @@
 # internal modules
 from tahoeConfig import createTahoeConfigDir, genTahoeConfig, genStorageConfig, createIntroducers
 from tahoeCommands import processTasks, tahoeRestore, tahoeBackup, tahoeStart, tahoeStop, watchTahoeCmd
+import secretBox
 
 # external modules
 import argparse
@@ -40,13 +41,10 @@ def main():
         parser.print_help()
         return -1
 
-    # decrypt backup manifest
-    # ...
-
-    # load backup manifest
-    manifest_fh = open(args.manifest, 'ro')
-    manifest_json = manifest_fh.read()
-    manifest_fh.close()
+    #
+    ## decrypt and load backup manifest
+    #
+    manifest_json = secretBox.promptlyDecryptFile(args.manifest)
     manifest = json.loads(manifest_json)
 
     if args.start:
