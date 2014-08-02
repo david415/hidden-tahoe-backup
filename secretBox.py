@@ -12,6 +12,15 @@ import os.path
 import re
 
 
+def encryptFile(filename, key):
+    # XXX never reuse a nonce; is this good enough? yeeup.
+    nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+    plaintext_fh = open(filename, 'r')
+    plaintext = plaintext_fh.read()
+    plaintext_fh.close()
+    box = nacl.secret.SecretBox(key)
+    return box.encrypt(plaintext, nonce, encoder=nacl.encoding.Base64Encoder)
+
 def promptlyEncryptFile(filename):
     """
     Encrypt file and return ciphertext.
@@ -21,20 +30,20 @@ def promptlyEncryptFile(filename):
     passphrase2 = getpass.getpass("Enter passphrase:")
     if passphrase != passphrase2:
         print "passphrases don't match"
-        sys.exit(-1)
+        return None
 
     key = nacl.hash.sha256(passphrase, encoder=nacl.encoding.RawEncoder)
+    return encryptFile(filename, key)
 
-    # XXX never reuse a nonce; is this good enough? yeeup.
-    nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
-    
-    plaintext_fh = open(filename, 'r')
-    plaintext = plaintext_fh.read()
-    plaintext_fh.close()
-
+def decryptFile(filename, key):
+    # XXX obviously for big ass files this will not work
+    fh = open(filename, 'r')
+    bin_ciphertext = binascii.a2b_base64(fh.read())
+    fh.close()
+    nonce = bin_ciphertext[0:24]
+    ciphertext = bin_ciphertext[24:]
     box = nacl.secret.SecretBox(key)
-    return box.encrypt(plaintext, nonce, encoder=nacl.encoding.Base64Encoder)
-
+    return box.decrypt(ciphertext, nonce)
 
 def promptlyDecryptFile(filename):
     """
@@ -43,17 +52,7 @@ def promptlyDecryptFile(filename):
     """
     passphrase = getpass.getpass("Enter passphrase:")
     key = nacl.hash.sha256(passphrase, encoder=nacl.encoding.RawEncoder)
-
-    # XXX obviously for big ass files this will not work
-    fh = open(filename, 'r')
-    bin_ciphertext = binascii.a2b_base64(fh.read())
-    fh.close()
-
-    nonce = bin_ciphertext[0:24]
-    ciphertext = bin_ciphertext[24:]
-
-    box = nacl.secret.SecretBox(key)
-    return box.decrypt(ciphertext, nonce)
+    return decryptFile(filename, key)
 
 
 def main():
