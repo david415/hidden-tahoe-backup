@@ -6,6 +6,8 @@ def watchTahoeCmd(tahoeCmd=None):
     """Run the given Tahoe-LAFS command and assert that it exits 0
     while watching for new data in realtime."""
 
+    print "watchTahoeCmd"
+
     # Torsocks will go away once we merge my native Tor integration for Tahoe-LAFS
     # see tahoe trac ticket #517
     if tahoeCmd.startswith('start') or tahoeCmd.startswith('restart'):
@@ -34,9 +36,9 @@ def tahoeBackup(nodeDir, remote, local, excludes=None):
         excludes_str = ""
         for exclude in excludes:
             excludes_str += "--exclude='%s' " % exclude
-        watchTahoeCmd("-d %s backup -v %s %s %s" % (nodeDir, excludes_str, local, remote))
+        watchTahoeCmd("backup -d %s -v %s %s %s" % (nodeDir, excludes_str, local, remote))
     else:
-        watchTahoeCmd("-d %s backup -v %s %s" % (nodeDir, local, remote))
+        watchTahoeCmd("backup -d %s -v %s %s" % (nodeDir, local, remote))
 
 def tahoeRestore(nodeDir, local, remote, restoreVersion):
     # XXX must needs idempotency!

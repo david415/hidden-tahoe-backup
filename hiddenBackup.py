@@ -9,6 +9,42 @@ import secretBox
 import argparse
 import json
 import sys
+import shutil
+
+
+class HiddenBackup(object):
+
+    def __init__(self, filename, passphrase):
+        key = secretBox.hashPassphrase(passphrase)
+        self.manifest = json.loads(secretBox.decryptFile(filename, key))
+        self.nodeDir = None
+        self.tahoeStarted = False
+
+    def createNodeDir(self, nodeDir):
+        print "creating temporary Tahoe-LAFS nodeDir %s" % nodeDir
+        self.nodeDir = nodeDir
+        createTahoeConfigDir(nodeDir=self.nodeDir, manifest=self.manifest)
+
+    def destroyNodeDir(self):
+        assert self.nodeDir is not None
+        print "destroying temporary Tahoe-LAFS nodeDir %s" % self.nodeDir
+        shutil.rmtree(self.nodeDir)
+
+    def startTahoe(self):
+        tahoeStart(nodeDir=self.nodeDir)
+        self.tahoeStarted = True
+
+    def stopTahoe(self):
+        assert self.tahoeStarted
+        tahoeStop(nodeDir=self.nodeDir)
+        self.tahoeStarted = False
+
+    def restore(self):
+        assert self.tahoeStarted
+        processTasks(isRestore=True, nodeDir=self.nodeDir, manifest=self.manifest)
+    def backup(self):
+        assert self.tahoeStarted
+        processTasks(isRestore=False, nodeDir=self.nodeDir, manifest=self.manifest)
 
 
 def main():
@@ -44,6 +80,7 @@ def main():
     #
     ## decrypt and load backup manifest
     #
+
     manifest_json = secretBox.promptlyDecryptFile(args.manifest)
     manifest = json.loads(manifest_json)
 
@@ -52,12 +89,12 @@ def main():
         createTahoeConfigDir(nodeDir=args.nodeDir, manifest=manifest)
 
         # XXX
-        tahoeStart(nodeDir=args.nodeDir)        
+        tahoeStart(nodeDir=args.nodeDir)
         return 0
 
     if args.stop:
         # XXX
-        tahoeStop(nodeDir=args.nodeDir)        
+        tahoeStop(nodeDir=args.nodeDir)
         return 0
 
     processTasks(isRestore=args.restore, nodeDir=args.nodeDir, manifest=manifest)

@@ -32,7 +32,7 @@ def promptlyEncryptFile(filename):
         print "passphrases don't match"
         return None
 
-    key = nacl.hash.sha256(passphrase, encoder=nacl.encoding.RawEncoder)
+    key = hashPassphrase(passphrase)
     return encryptFile(filename, key)
 
 def decryptFile(filename, key):
@@ -51,8 +51,11 @@ def promptlyDecryptFile(filename):
     Prompt for the passphrase.
     """
     passphrase = getpass.getpass("Enter passphrase:")
-    key = nacl.hash.sha256(passphrase, encoder=nacl.encoding.RawEncoder)
+    key = hashPassphrase(passphrase)
     return decryptFile(filename, key)
+
+def hashPassphrase(passphrase):
+    return nacl.hash.sha256(passphrase, encoder=nacl.encoding.RawEncoder)
 
 
 def main():
