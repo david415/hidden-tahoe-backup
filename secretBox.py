@@ -32,15 +32,14 @@ def promptlyEncryptFile(filename):
 
     key = nacl.hash.sha256(passphrase, encoder=nacl.encoding.RawEncoder)
 
-    # XXX never reuse a nonce; is this good enough? nope.
+    # XXX never reuse a nonce; is this good enough? yeeup.
     nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
     
     plaintext_fh = open(filename, 'r')
     plaintext = plaintext_fh.read()
     plaintext_fh.close()
 
-    ciphertext = encrypt(plaintext, nonce, key)
-    return ciphertext
+    return encrypt(plaintext, nonce, key)
 
 def promptlyDecryptFile(filename):
     """
@@ -50,14 +49,15 @@ def promptlyDecryptFile(filename):
     passphrase = getpass.getpass("Enter passphrase:")
     key = nacl.hash.sha256(passphrase, encoder=nacl.encoding.RawEncoder)
 
+    # XXX obviously for big ass files this will not work
     fh = open(filename, 'r')
     bin_ciphertext = binascii.a2b_base64(fh.read())
     fh.close()
+
     nonce = bin_ciphertext[0:24]
     ciphertext = bin_ciphertext[24:]
 
-    plaintext = decrypt(ciphertext, nonce, key)
-    return plaintext
+    return decrypt(ciphertext, nonce, key)
 
 
 def main():
