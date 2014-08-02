@@ -28,6 +28,17 @@ It can be used to backup and restore your Tails Persistent volume to a Tahoe-LAF
 There are several ways to integrate Tahoe-LAFS and Tails; this. is. just. one. way. to. do. it.
 
 
+#### are you a security UX design expert?
+
+Please contact me! I need your help to make sure hidden-tahoe-backup has
+an excellently easy to use intuitive user interface.
+
+#### are you a PyGTK+3 expert?
+
+Please contact me if you would like to help out with
+writing the graphical user interface for this project!
+
+
 #### what is an onion grid?
 
 It's a Tahoe-LAFS storage grid, a collection of Tahoe-LAFS storage servers that are only
@@ -121,15 +132,18 @@ in the grid.
 * pynacl
 * libsodium
 
-The Torsocks dependency will be removed once my native Tor integration is merged and resolves Tahoe-LAFS trac ticket 517:
+**GUI:**
+* GTK+3
+* Twisted
+* pygtk
+
+**The Torsocks dependency** will be removed once my native Tor integration is merged and resolves Tahoe-LAFS trac ticket 517:
 https://tahoe-lafs.org/trac/tahoe-lafs/ticket/517
 
 
 #### development style
 
-I'm using an iterative approach; that is a polite way of saying
-that I will soon improve the code quality over time...
-but right now focus is on producing a **working proof of concept!**
+I'm using an iterative approach so I can quickly produce a **working proof of concept!**
 
 This backup system is currently built by wrapping the "tahoe cp" and "tahoe backup" commands...
 however in the future this "backup manifest" functionality could be implemented
@@ -139,8 +153,8 @@ These "backup manifests" are essentially an alternate configuration format for T
 with metadata for performing backup and restore operations.
 
 I'm looking forward to implementing several other Tahoe-LAFS backup systems for Tails.
-I think they will each have their own advantages. Clearly this system's advantage will be
-the ability to reduce the complexity of data retrieval to a passphrase and information about
+I think they will each have their own advantages. Clearly this system's advantage is the
+ability to reduce the complexity of data retrieval to a passphrase and information about
 where to find the encrypted manifest.
 
 
