@@ -11,13 +11,6 @@ import sys
 import os.path
 import re
 
-def encrypt(plaintext, nonce, key):
-    box = nacl.secret.SecretBox(key)
-    return box.encrypt(plaintext, nonce, encoder=nacl.encoding.Base64Encoder)
-
-def decrypt(ciphertext, nonce, key):
-    box = nacl.secret.SecretBox(key)
-    return box.decrypt(ciphertext, nonce)
 
 def promptlyEncryptFile(filename):
     """
@@ -39,7 +32,9 @@ def promptlyEncryptFile(filename):
     plaintext = plaintext_fh.read()
     plaintext_fh.close()
 
-    return encrypt(plaintext, nonce, key)
+    box = nacl.secret.SecretBox(key)
+    return box.encrypt(plaintext, nonce, encoder=nacl.encoding.Base64Encoder)
+
 
 def promptlyDecryptFile(filename):
     """
@@ -57,7 +52,8 @@ def promptlyDecryptFile(filename):
     nonce = bin_ciphertext[0:24]
     ciphertext = bin_ciphertext[24:]
 
-    return decrypt(ciphertext, nonce, key)
+    box = nacl.secret.SecretBox(key)
+    return box.decrypt(ciphertext, nonce)
 
 
 def main():
@@ -80,32 +76,11 @@ def main():
 
     for filename in files:
         if args.decrypt:
-            if not filename.endswith('.secretbox'):
-                print "Filename must end in .secretbox"
-                sys.exit(-1)
-
-            plaintext_file = url = re.sub('\.secretbox$', '', filename)
-
-            if os.path.isfile(plaintext_file):
-                print "%s already exists." % plaintext_file
-                sys.exit(-1)
-
             plaintext = promptlyDecryptFile(filename)
-
-            fh_plaintext = open(plaintext_file, 'w')
-            fh_plaintext.write(plaintext)
-            fh_plaintext.close()
+            print plaintext
         else:
-            ciphertext_file = filename + '.secretbox'
-            if os.path.isfile(ciphertext_file):
-                print "%s already exists" % (ciphertext_file,)
-                sys.exit(-1)
-
             ciphertext = promptlyEncryptFile(filename)
-
-            fh_ciphertext = open(ciphertext_file, 'w')
-            fh_ciphertext.write(ciphertext)
-            fh_ciphertext.close()
+            print ciphertext
 
     return 0
 
