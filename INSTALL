@@ -3,8 +3,13 @@
 
 Install
 
+
 Using system libgtk and Python virtualenv:
 
+
+0. install gtk+3
+
+sudo apt-get install gtk+3-dev
 
 1. create and activate a new virtual env
 
@@ -17,8 +22,11 @@ Using system libgtk and Python virtualenv:
 
 2. install
 
-# if you have a local git clone of the repo
-# then install it like this
+pip install git+https://github.com/david415/hidden-tahoe-backup.git
+
+
+# or if you have a local git clone of the repo then:
+
 cd /home/amnesia/Persistent/projects/hidden-tahoe-backup
 pip install .
 
