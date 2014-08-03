@@ -79,8 +79,8 @@ class BackupRestoreWindow(Gtk.Window):
         self.add(box)
 
         label = Gtk.Label()
-        label.set_markup("Go to <a href=\"http://127.0.0.1:7657\" title=\"Tahoe-LAFS gateway\">Tahoe-LAFS local gateway status page</a>\n \
-to see when your Tahoe-LAFS client is fully connected to the onion grid.")
+        label.set_markup("Go to <a href=\"http://127.0.0.1:7657\" title=\"Tahoe-LAFS gateway\">Tahoe-LAFS local gateway status page</a>\n" +
+                         "to see when your Tahoe-LAFS client is fully connected to the onion grid.")
         box.pack_start(label, False, False, 0)
 
 
@@ -114,8 +114,8 @@ class MainWindow(Gtk.Window):
         self.add(box)
 
         label = Gtk.Label()
-        label.set_markup("<b>disclaimer: this is a very early development version with no peer review\n\n\n\
-You must either use an existing backup-manifest or create a new one:</b>")
+        label.set_markup("<b>disclaimer: this is a very early development version with no peer review\n\n\n" +
+                         "You must either use an existing backup-manifest or create a new one:</b>")
         box.pack_start(label, False, False, 0)
 
         manifestButton = Gtk.Button("start Tahoe-LAFS client with existing backup manifest file")
@@ -127,8 +127,8 @@ You must either use an existing backup-manifest or create a new one:</b>")
         box.pack_start(manifestButton, False, False, 0)
 
         bottomLabel = Gtk.Label()
-        bottomLabel.set_markup("<b>NOTE:</b> An encrypted backup manifest encapsulates the Tahoe-LAFS configuration\n\
-as well as meta data about your backup and restore operations.")
+        bottomLabel.set_markup("<b>NOTE:</b> An encrypted backup manifest encapsulates the Tahoe-LAFS configuration\n" +
+                               "as well as meta data about your backup and restore operations.")
         box.pack_start(bottomLabel, False, False, 0)
 
 
@@ -234,12 +234,13 @@ as well as meta data about your backup and restore operations.")
         backupRestoreWindow.connect("delete-event", lambda x,y: self.stopTahoeInstance())
 
     def failedVerification(self, manifestFile):
-        print "NaCl SecretBox failed to decrypt %s" % (manifestFile,)
+        print "encrypted backup-manifest (NaCl SecretBox) failed to decrypt %s" % (manifestFile,)
         print "Either you entered an incorrect passphrase or the ciphertext has been tampered with."
 
         dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO,
                                    Gtk.ButtonsType.OK, "ciphertext VERIFICATION failure")
-        dialog.format_secondary_text("incorrect passphrase or ciphertext/nonce has been tampered with")
+        dialog.format_secondary_text("encrypted backup-manifest (NaCl SecretBox) failed to decrypt\n" +
+                                     "incorrect passphrase or ciphertext/nonce has been tampered with")
         dialog.run()
         dialog.destroy()
 
