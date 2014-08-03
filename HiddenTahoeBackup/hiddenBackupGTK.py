@@ -162,7 +162,7 @@ as well as meta data about your backup and restore operations.")
     def createManifest(self, widget):
 
         packagedir = HiddenTahoeBackup.__path__[0]
-        dirname = os.path.join(os.path.dirname(packagedir), '..', 'share', 'HiddenTahoeBackup')
+        dirname = os.path.join(os.path.dirname(packagedir), 'HiddenTahoeBackup', 'data')
         manifestGladeFile = os.path.join(dirname, "manifestCreate.glade")
 
         builder = Gtk.Builder()

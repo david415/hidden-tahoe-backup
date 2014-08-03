@@ -10,7 +10,7 @@ import os
 import os.path
 import shutil
 import re
-from setuptools import setup
+from distutils.core import setup
 
 __version__ = '0.0.1'
 __author__ = 'David Stainton'
@@ -61,12 +61,12 @@ setup(name = 'hiddenTahoeBackup',
       url = __url__,
       license = __license__,
       packages = ["HiddenTahoeBackup"],
+      package_dir={'HiddenTahoeBackup': 'HiddenTahoeBackup'},
+      package_data={'HiddenTahoeBackup': ['data/*.glade']},
       scripts = ['HiddenTahoeBackup/secretBox.py',
                  'HiddenTahoeBackup/hiddenBackupCLI.py',
                  'HiddenTahoeBackup/hiddenBackupGTK.py'],
-
       include_package_data = True,
       data_files = [('share/HiddenTahoeBackup', ['README.md'])],
-      package_data = {'share':'*.glade'}
       )
 
