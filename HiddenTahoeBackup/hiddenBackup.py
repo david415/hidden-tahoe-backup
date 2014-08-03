@@ -29,6 +29,7 @@ class HiddenBackup(object):
         shutil.rmtree(self.nodeDir)
 
     def startTahoe(self):
+        assert not self.tahoeStarted
         tahoeStart(nodeDir=self.nodeDir)
         self.tahoeStarted = True
 

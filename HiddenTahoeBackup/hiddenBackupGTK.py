@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
+# external modules
 from gi.repository import Gtk, Gio
+import os.path
+import shutil
 
 # internal modules
 from HiddenTahoeBackup.tahoeConfig import createTahoeConfigDir, genTahoeConfig, genStorageConfig, createIntroducers
@@ -16,10 +19,8 @@ class PassphraseDialog(Gtk.Dialog):
             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
              Gtk.STOCK_OK, Gtk.ResponseType.OK))
 
-        self.set_default_size(300, 200)
-
+        self.set_default_size(300, 100)
         label = Gtk.Label("enter passphrase")
-
         box = self.get_content_area()
         box.add(label)
 
@@ -31,6 +32,22 @@ class PassphraseDialog(Gtk.Dialog):
         self.show_all()
 
 
+class DestroyDirectoryDialog(Gtk.Dialog):
+
+    def __init__(self, parent):
+        Gtk.Dialog.__init__(self, "My Dialog", parent, 0,
+            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+             Gtk.STOCK_OK, Gtk.ResponseType.OK))
+
+        self.set_default_size(150, 100)
+
+        label = Gtk.Label("Overwrite existing hiddenTahoe nodeDir %s ?" % parent.nodeDir)
+
+        box = self.get_content_area()
+        box.add(label)
+        self.show_all()
+
+
 class MainWindow(Gtk.Window):
 
     def __init__(self):
@@ -39,11 +56,10 @@ class MainWindow(Gtk.Window):
         self.hiddenBackup = None
 
         self.set_position(Gtk.WindowPosition.CENTER)
-        self.set_default_size(400, 250)
-        self.set_border_width(24)
+        self.set_default_size(400, 200)
+        self.set_border_width(10)
 
-        self.box = box = Gtk.Box(spacing=20)
-        box.set_spacing (5)
+        self.box = box = Gtk.Box(spacing=10)
         box.set_orientation (Gtk.Orientation.VERTICAL)
         box.set_homogeneous(False)
 
@@ -51,15 +67,8 @@ class MainWindow(Gtk.Window):
 
         manifestButton = Gtk.Button("choose backup manifest file")
         manifestButton.connect("clicked", self.on_file_clicked)
+        manifestButton.connect("activate", self.on_file_clicked)
         box.pack_start(manifestButton, False, False, 0)
-
-        startButton = Gtk.Button("start Tahoe-LAFS client")
-        startButton.connect("clicked", self.start_clicked)
-        box.pack_start(startButton, False, False, 0)
-
-        stopButton = Gtk.Button("stop Tahoe-LAFS client")
-        stopButton.connect("clicked", self.stop_clicked)
-        box.pack_start(stopButton, False, False, 0)
 
         backupButton = Gtk.Button("backup")
         backupButton.connect("clicked", self.backup_clicked)
@@ -69,21 +78,18 @@ class MainWindow(Gtk.Window):
         restoreButton.connect("clicked", self.restore_clicked)
         box.pack_start(restoreButton, False, False, 0)
 
+        self.on_file_clicked(None)
+
 
     def quit(self):
-        if self.hiddenBackup.tahoeStarted:
-            self.hiddenBackup.stopTahoe()
-            self.hiddenBackup.destroyNodeDir()
+        self.stopTahoeInstance()
         reactor.stop()
 
-    def start_clicked(self, widget):
+    def stopTahoeInstance(self):
         if self.hiddenBackup is not None:
-            self.hiddenBackup.startTahoe()
-        else:
-            print "hiddenBackup is not initialized"
-
-    def stop_clicked(self, widget):
-        self.hiddenBackup.stopTahoe()
+            self.hiddenBackup.stopTahoe()
+            self.hiddenBackup.destroyNodeDir()
+            self.hiddenBackup = None
 
     def backup_clicked(self, widget):
         self.hiddenBackup.backup()
@@ -96,8 +102,7 @@ class MainWindow(Gtk.Window):
         Display a passphrase dialog window.
         returns the user entered passphrase string
         """
-        self.fileEntry = Gtk.Entry()
-        self.box.pack_start(self.fileEntry, True, True, 0)       
+
         passDialog = PassphraseDialog(self)
         response = passDialog.run()
 
@@ -110,10 +115,12 @@ class MainWindow(Gtk.Window):
         return None
 
     def on_file_clicked(self, widget):
-        self.fileDialog = Gtk.FileChooserDialog("Please choose a file", self,
+        self.fileDialog = Gtk.FileChooserDialog("Please choose an encrypted manifest file", self,
                                            Gtk.FileChooserAction.OPEN,
                                            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                             Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+
+        #self.fileDialog.set_default_size(300, 250)
 
         self.add_filters(self.fileDialog)
 
@@ -121,14 +128,38 @@ class MainWindow(Gtk.Window):
         if response == Gtk.ResponseType.OK:
             self.manifest_file = self.fileDialog.get_filename()
             passphrase = self.getPassphrase()
+            self.fileDialog.destroy()
             if passphrase is not None:
-
-                self.hiddenBackup = HiddenBackup(self.manifest_file, passphrase)
-                # temporarily hard coded for Tails =-)
-                nodeDir = "/home/amnesia/.hiddenTahoe"
-                self.hiddenBackup.createNodeDir(nodeDir)
-
+                self.configAndStartTahoe(self.manifest_file, passphrase)
+                return
         self.fileDialog.destroy()
+
+    def configAndStartTahoe(self, manifestFile, passphrase):
+        self.hiddenBackup = HiddenBackup(self.manifest_file, passphrase)
+        home = os.path.expanduser('~')
+        self.nodeDir = os.path.join(home,'.hiddenTahoe')
+
+        if os.path.exists(self.nodeDir):
+            # XXX must needs prompt user for permission to destroy
+            # and recreate or cancel operation
+
+            print "XXX %s already exists" % self.nodeDir
+
+            destroyDialog = DestroyDirectoryDialog(self)
+            response = destroyDialog.run()
+            destroyDialog.destroy()
+
+            if response == Gtk.ResponseType.OK:
+                # XXX destroy
+                shutil.rmtree(self.nodeDir)
+                self.hiddenBackup.createNodeDir(self.nodeDir)
+            elif response == Gtk.ResponseType.CANCEL:
+                print "cancelled destroying old nodeDir %s" % (self.nodeDir,)
+                return
+        else:
+            self.hiddenBackup.createNodeDir(self.nodeDir)
+
+        self.hiddenBackup.startTahoe()
 
     def add_filters(self, dialog):
         filter_text = Gtk.FileFilter()
