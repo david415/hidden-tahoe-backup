@@ -74,7 +74,7 @@ specifies the Tahoe-LAFS snapshot locations and which local directories to resto
 ##### why not just use gpg in symmetric mode to encrypt the backup manifest?
 
 **gpg** is terribly powerful as well as terrible. **gpg --symmetric** does not MAC the ciphertext!
-Instead I using **DJB's NaCl SecretBox** to verifiably encrypt/decrypt the backup manifests.
+Instead I use **DJB's NaCl SecretBox** to verifiably encrypt/decrypt the backup manifests.
 
 
 #### why Tails?
