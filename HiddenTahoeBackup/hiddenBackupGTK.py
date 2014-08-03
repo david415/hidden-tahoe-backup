@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
 from gi.repository import Gtk, Gio
-import json
 
 # internal modules
-from tahoeConfig import createTahoeConfigDir, genTahoeConfig, genStorageConfig, createIntroducers
-from tahoeCommands import processTasks, tahoeRestore, tahoeBackup, tahoeStart, tahoeStop, watchTahoeCmd
-from hiddenBackup import HiddenBackup
-import secretBox
+from HiddenTahoeBackup.tahoeConfig import createTahoeConfigDir, genTahoeConfig, genStorageConfig, createIntroducers
+from HiddenTahoeBackup.tahoeCommands import processTasks, tahoeRestore, tahoeBackup, tahoeStart, tahoeStop, watchTahoeCmd
+from HiddenTahoeBackup.hiddenBackup import HiddenBackup
+import HiddenTahoeBackup.secretBox as secretBox
 
 
 class PassphraseDialog(Gtk.Dialog):

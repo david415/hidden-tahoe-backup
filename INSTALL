@@ -1,0 +1,24 @@
+
+
+
+Install
+
+Using system libgtk and Python virtualenv:
+
+
+1. create and activate a new virtual env
+
+# Firstly you should always use the latest stable Python virtualenv
+# and always verify it's gpg signature before using!
+
+./virtualenv-x.y.z/virtualenv.py --system-site-packages virtenv-hidden-tahoe/
+. virtenv-hidden-tahoe/bin/activate
+
+
+2. install
+
+# if you have a local git clone of the repo
+# then install it like this
+cd /home/amnesia/Persistent/projects/hidden-tahoe-backup
+pip install .
+
