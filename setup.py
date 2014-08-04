@@ -62,11 +62,9 @@ setup(name = 'hiddenTahoeBackup',
       license = __license__,
       packages = ["HiddenTahoeBackup"],
       package_dir={'HiddenTahoeBackup': 'HiddenTahoeBackup'},
-      package_data={'HiddenTahoeBackup': ['data/*.glade']},
       scripts = ['HiddenTahoeBackup/secretBox.py',
                  'HiddenTahoeBackup/hiddenBackupCLI.py',
                  'HiddenTahoeBackup/hiddenBackupGTK.py'],
-      include_package_data = True,
       data_files = [('share/HiddenTahoeBackup', ['README.md'])],
       )
 
