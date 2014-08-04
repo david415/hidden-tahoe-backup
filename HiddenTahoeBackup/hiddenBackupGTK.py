@@ -14,6 +14,128 @@ from HiddenTahoeBackup.hiddenBackup import HiddenBackup
 import HiddenTahoeBackup.secretBox as secretBox
 
 
+class ManifestCreationWindow(Gtk.Window):
+
+    def __init__(self):
+        Gtk.Window.__init__(self, title="HiddenTahoe Manifest Creation Console")
+        self.set_border_width(10)
+        self.set_default_size(500,300)
+
+
+        self.grid = Gtk.Grid()
+        self.add(self.grid)
+
+        manifestLabel = Gtk.Label()
+        manifestLabel.set_markup("<b>NOTE:</b> An encrypted backup manifest encapsulates the Tahoe-LAFS configuration\n" +
+                               "as well as meta data about your backup and restore operations.\n\n")
+        self.grid.add(manifestLabel)
+
+        blank = Gtk.Label()
+        self.grid.attach_next_to(blank, manifestLabel, Gtk.PositionType.BOTTOM, 1, 1)
+
+        introLabel = Gtk.Label()
+        introLabel.set_markup("Tahoe-LAFS Introducer FURL")
+        self.grid.attach(introLabel, 0, 1, 1, 1)
+
+        introEntry = Gtk.Entry()
+        introEntry.set_editable(True)
+        introEntry.set_width_chars(48)
+        self.grid.attach(introEntry, 1, 1, 4, 1)
+
+        blank = Gtk.Label()
+        self.grid.attach_next_to(blank, introEntry, Gtk.PositionType.BOTTOM, 1, 1)
+
+
+        self.aliasNum = 0
+        self.aliasOffset = 5
+
+        newCapButton = Gtk.Button("Generate New Cryptographic Alias")
+        newCapButton.connect("clicked", self.newAliasCap)
+        self.grid.attach(newCapButton, 0, 3, 1, 1)
+
+        existingCapButton = Gtk.Button("Specify Existing Cryptographic Alias")
+        existingCapButton.connect("clicked", self.existingAliasCap)
+        self.grid.attach(existingCapButton, 3, 3, 1, 1)
+
+        blank = Gtk.Label()
+        self.grid.attach_next_to(blank, newCapButton, Gtk.PositionType.BOTTOM, 1, 1)
+
+
+    def existingAliasCap(self, x):
+        print "existingAliasCap"
+        self.aliasNum += 1
+        row = self.aliasOffset + self.aliasNum
+        rowPeers = []
+
+        label = Gtk.Label()
+        label.set_markup("existing alias name")
+        self.grid.attach(label, 0, row, 1, 1)
+        rowPeers.append(label)
+
+        aliasNameEntry = Gtk.Entry()
+        aliasNameEntry.set_editable(True)
+        aliasNameEntry.set_width_chars(16)
+        self.grid.attach(aliasNameEntry, 1, row, 1, 1)
+        rowPeers.append(aliasNameEntry)
+
+        label = Gtk.Label()
+        label.set_markup("existing cryptographic capability")
+        self.grid.attach(label, 2, row, 1, 1)
+        rowPeers.append(label)
+
+        aliasCap = Gtk.Entry()
+        aliasCap.set_editable(True)
+        aliasCap.set_width_chars(32)
+        self.grid.attach(aliasCap, 3, row, 1, 1)
+        rowPeers.append(aliasCap)
+
+        deleteAliasButton = Gtk.Button("delete alias")
+        deleteAliasButton.connect("clicked", lambda ign: self.deleteAliasRow(ign, rowPeers))
+        self.grid.attach(deleteAliasButton, 4, row, 1, 1)
+        rowPeers.append(deleteAliasButton)
+
+        self.show_all()
+
+    def deleteAliasRow(self, x, rowPeers):
+        print "deleteAlias"
+        for item in rowPeers:
+            self.grid.remove(item)
+
+    def newAliasCap(self, x):
+        print "newAliasCap"
+        self.aliasNum += 1
+        row = self.aliasOffset + self.aliasNum
+        rowPeers = []
+
+        label = Gtk.Label()
+        label.set_markup("new alias name")
+        self.grid.attach(label,0,row,1,1)
+        rowPeers.append(label)
+
+        aliasNameEntry = Gtk.Entry()
+        aliasNameEntry.set_editable(True)
+        aliasNameEntry.set_width_chars(16)
+        self.grid.attach(aliasNameEntry,1,row,1,1)
+        rowPeers.append(aliasNameEntry)
+
+        deleteAliasButton = Gtk.Button("delete alias")
+        deleteAliasButton.connect("clicked", lambda ign: self.deleteAliasRow(ign, rowPeers))
+        self.grid.attach(deleteAliasButton, 4, row, 1,1)
+        rowPeers.append(deleteAliasButton)
+        self.show_all()
+
+    def on_button_toggled(self, button, name):
+        if name == "newCap" and button.get_active():
+            print "newCap"
+            return
+        if name == "existingCap" and button.get_active():
+            print "existingCap"
+            capEntry = Gtk.Entry()
+            capEntry.set_editable(True)
+            capEntry.set_width_chars(32)
+            self.box.add(capEntry)
+            self.show_all()
+
 class PassphraseDialog(Gtk.Dialog):
 
     def __init__(self, parent):
@@ -126,10 +248,6 @@ class MainWindow(Gtk.Window):
         manifestButton.connect("clicked", self.createManifest)
         box.pack_start(manifestButton, False, False, 0)
 
-        bottomLabel = Gtk.Label()
-        bottomLabel.set_markup("<b>NOTE:</b> An encrypted backup manifest encapsulates the Tahoe-LAFS configuration\n" +
-                               "as well as meta data about your backup and restore operations.")
-        box.pack_start(bottomLabel, False, False, 0)
 
 
     def quit(self):
@@ -160,23 +278,17 @@ class MainWindow(Gtk.Window):
         return None
 
     def createManifest(self, widget):
+        win = ManifestCreationWindow()
+        win.show_all()
 
-        packagedir = HiddenTahoeBackup.__path__[0]
-        dirname = os.path.join(os.path.dirname(packagedir), 'HiddenTahoeBackup', 'data')
-        manifestGladeFile = os.path.join(dirname, "manifestCreate.glade")
+    def existingCap(self, x):
+        print "existingCap"
 
-        builder = Gtk.Builder()
-        builder.add_from_file(manifestGladeFile)
-        handlers = {
-            "onDeleteWindow": self.commitManifest,
-            }
-        builder.connect_signals(handlers)
-        window = builder.get_object("manifestWindow")
-        window.show_all()
-
+    def createNewCapAlias(self, x):
+        print "radio"
 
     def commitManifest(self, x, y):
-        print "commiting new manifest"
+        print "commiting new manifest to a secretBox file..."
 
     def chooseManifest(self, widget):
         print "chooseManifest"
@@ -207,17 +319,13 @@ class MainWindow(Gtk.Window):
         self.nodeDir = os.path.join(home,'.hiddenTahoe')
 
         if os.path.exists(self.nodeDir):
-            # XXX must needs prompt user for permission to destroy
-            # and recreate or cancel operation
-
-            print "XXX %s already exists" % self.nodeDir
+            print "nodeDir %s already exists" % self.nodeDir
 
             destroyDialog = DestroyDirectoryDialog(self)
             response = destroyDialog.run()
             destroyDialog.destroy()
 
             if response == Gtk.ResponseType.OK:
-                # XXX destroy
                 shutil.rmtree(self.nodeDir)
                 self.hiddenBackup.createNodeDir(self.nodeDir)
             elif response == Gtk.ResponseType.CANCEL:
