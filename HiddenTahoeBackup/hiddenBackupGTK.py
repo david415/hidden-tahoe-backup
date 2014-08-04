@@ -7,7 +7,6 @@ import shutil
 import nacl.exceptions
 
 # internal modules
-import HiddenTahoeBackup
 from HiddenTahoeBackup.tahoeConfig import createTahoeConfigDir, genTahoeConfig, genStorageConfig, createIntroducers
 from HiddenTahoeBackup.tahoeCommands import processTasks, tahoeRestore, tahoeBackup, tahoeStart, tahoeStop, watchTahoeCmd
 from HiddenTahoeBackup.hiddenBackup import HiddenBackup
@@ -19,19 +18,26 @@ class ManifestCreationWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="HiddenTahoe Manifest Creation Console")
         self.set_border_width(10)
-        self.set_default_size(500,300)
+        self.set_default_size(500,200)
 
-
+        self.rows = {}
         self.grid = Gtk.Grid()
         self.add(self.grid)
 
         manifestLabel = Gtk.Label()
         manifestLabel.set_markup("<b>NOTE:</b> An encrypted backup manifest encapsulates the Tahoe-LAFS configuration\n" +
                                "as well as meta data about your backup and restore operations.\n\n")
-        self.grid.add(manifestLabel)
+        self.grid.attach(manifestLabel,0,0,4,1)
 
         blank = Gtk.Label()
         self.grid.attach_next_to(blank, manifestLabel, Gtk.PositionType.BOTTOM, 1, 1)
+
+        nextButton = Gtk.Button("Next Configuration Section --->")
+        nextButton.connect("clicked", self.checkSubmission)
+        self.grid.attach(nextButton, 5, 0, 1, 1)
+
+        blank = Gtk.Label()
+        self.grid.attach_next_to(blank, nextButton, Gtk.PositionType.BOTTOM, 1, 1)
 
         introLabel = Gtk.Label()
         introLabel.set_markup("Tahoe-LAFS Introducer FURL")
@@ -39,12 +45,11 @@ class ManifestCreationWindow(Gtk.Window):
 
         introEntry = Gtk.Entry()
         introEntry.set_editable(True)
-        introEntry.set_width_chars(48)
-        self.grid.attach(introEntry, 1, 1, 4, 1)
+        introEntry.set_width_chars(32)
+        self.grid.attach(introEntry, 1, 1, 3, 1)
 
         blank = Gtk.Label()
         self.grid.attach_next_to(blank, introEntry, Gtk.PositionType.BOTTOM, 1, 1)
-
 
         self.aliasNum = 0
         self.aliasOffset = 5
@@ -59,6 +64,11 @@ class ManifestCreationWindow(Gtk.Window):
 
         blank = Gtk.Label()
         self.grid.attach_next_to(blank, newCapButton, Gtk.PositionType.BOTTOM, 1, 1)
+
+    def checkSubmission(self, x):
+        print "checkSubmission"
+        for entries in self.rows.values():
+            print map(lambda x: x.get_text(), entries[1])
 
 
     def existingAliasCap(self, x):
@@ -90,16 +100,18 @@ class ManifestCreationWindow(Gtk.Window):
         rowPeers.append(aliasCap)
 
         deleteAliasButton = Gtk.Button("delete alias")
-        deleteAliasButton.connect("clicked", lambda ign: self.deleteAliasRow(ign, rowPeers))
+        deleteAliasButton.connect("clicked", lambda ign: self.deleteAliasRow(ign, row))
         self.grid.attach(deleteAliasButton, 4, row, 1, 1)
         rowPeers.append(deleteAliasButton)
+        self.rows[row] = (rowPeers, [aliasNameEntry, aliasCap])
 
         self.show_all()
 
-    def deleteAliasRow(self, x, rowPeers):
+    def deleteAliasRow(self, x, row):
         print "deleteAlias"
-        for item in rowPeers:
+        for item in self.rows[row][0]:
             self.grid.remove(item)
+        del self.rows[row]
 
     def newAliasCap(self, x):
         print "newAliasCap"
@@ -119,9 +131,12 @@ class ManifestCreationWindow(Gtk.Window):
         rowPeers.append(aliasNameEntry)
 
         deleteAliasButton = Gtk.Button("delete alias")
-        deleteAliasButton.connect("clicked", lambda ign: self.deleteAliasRow(ign, rowPeers))
+        deleteAliasButton.connect("clicked", lambda ign: self.deleteAliasRow(ign, row))
         self.grid.attach(deleteAliasButton, 4, row, 1,1)
         rowPeers.append(deleteAliasButton)
+
+        self.rows[row] = (rowPeers, [aliasNameEntry])
+
         self.show_all()
 
     def on_button_toggled(self, button, name):
