@@ -27,48 +27,85 @@ class ManifestCreationWindow(Gtk.Window):
         manifestLabel = Gtk.Label()
         manifestLabel.set_markup("<b>NOTE:</b> An encrypted backup manifest encapsulates the Tahoe-LAFS configuration\n" +
                                "as well as meta data about your backup and restore operations.\n\n")
-        self.grid.attach(manifestLabel,0,0,4,1)
+        self.grid.attach(manifestLabel,0,0,2,1)
+
+        self.warn = Gtk.Label()
+        self.grid.attach_next_to(self.warn, manifestLabel, Gtk.PositionType.BOTTOM, 2, 1)
+
+        blank = Gtk.Label()
+        self.grid.attach_next_to(blank, self.warn, Gtk.PositionType.BOTTOM, 1, 1)
+
+        nextButton = Gtk.Button("Next Configuration Section --->")
+        nextButton.connect("clicked", self.checkSubmission)
+        self.grid.attach(nextButton, 3, 0, 1, 1)
 
         blank = Gtk.Label()
         self.grid.attach_next_to(blank, manifestLabel, Gtk.PositionType.BOTTOM, 1, 1)
 
-        nextButton = Gtk.Button("Next Configuration Section --->")
-        nextButton.connect("clicked", self.checkSubmission)
-        self.grid.attach(nextButton, 5, 0, 1, 1)
-
-        blank = Gtk.Label()
-        self.grid.attach_next_to(blank, nextButton, Gtk.PositionType.BOTTOM, 1, 1)
-
         introLabel = Gtk.Label()
         introLabel.set_markup("Tahoe-LAFS Introducer FURL")
-        self.grid.attach(introLabel, 0, 1, 1, 1)
+        self.grid.attach_next_to(introLabel, blank, Gtk.PositionType.BOTTOM, 1, 1)
 
-        introEntry = Gtk.Entry()
-        introEntry.set_editable(True)
-        introEntry.set_width_chars(32)
-        self.grid.attach(introEntry, 1, 1, 3, 1)
+        self.introEntry = Gtk.Entry()
+        self.introEntry.set_editable(True)
+        self.introEntry.set_width_chars(32)
+        self.grid.attach_next_to(self.introEntry, introLabel, Gtk.PositionType.RIGHT, 1, 1)
 
         blank = Gtk.Label()
-        self.grid.attach_next_to(blank, introEntry, Gtk.PositionType.BOTTOM, 1, 1)
+        self.grid.attach_next_to(blank, self.introEntry, Gtk.PositionType.BOTTOM, 1, 1)
 
         self.aliasNum = 0
         self.aliasOffset = 5
 
         newCapButton = Gtk.Button("Generate New Cryptographic Alias")
         newCapButton.connect("clicked", self.newAliasCap)
-        self.grid.attach(newCapButton, 0, 3, 1, 1)
+        self.grid.attach_next_to(newCapButton, blank, Gtk.PositionType.BOTTOM, 1, 1)
 
         existingCapButton = Gtk.Button("Specify Existing Cryptographic Alias")
         existingCapButton.connect("clicked", self.existingAliasCap)
-        self.grid.attach(existingCapButton, 3, 3, 1, 1)
+        self.grid.attach_next_to(existingCapButton, newCapButton, Gtk.PositionType.RIGHT, 1, 1)
 
         blank = Gtk.Label()
         self.grid.attach_next_to(blank, newCapButton, Gtk.PositionType.BOTTOM, 1, 1)
 
     def checkSubmission(self, x):
+        """madness
+        """
         print "checkSubmission"
+
+        existingAliases = []
+        newAliases = []
+        introducer = self.introEntry.get_text()
+        if len(introducer) == 0:
+            self.warn.set_text('user error: fields left blank')
+            self.show_all()
+            return
+
+        if len(self.rows) == 0:
+            self.warn.set_text('need at least one alias')
+            self.show_all()
+            return
+
         for entries in self.rows.values():
-            print map(lambda x: x.get_text(), entries[1])
+            for item in map(lambda x: x.get_text(), entries[1]):
+                if len(item) == 0:
+                    self.warn.set_text('user error: fields left blank')
+                    self.show_all()
+                    return
+
+            if len(entries[1]) == 1:
+                newAliases.append(entries[1][0].get_text())
+            else:
+                assert len(aliasFields) == 2
+                existingAliases.append((entries[1][0].get_text(), entries[1][1].get_text()))
+
+        # XXX
+        # if we made it this far then we have all the info we need
+        # to record and move on to the next configuration steps
+
+        print introducer
+        print existingAliases
+        print newAliases
 
 
     def existingAliasCap(self, x):
