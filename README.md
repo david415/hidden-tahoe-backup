@@ -174,6 +174,37 @@ process 13612 is dead
 (virtenv-hidden-tahoe)amnesia@amnesia:~/Persistent/projects/hidden-tahoe-backup$
 ```
 
+#### using the GUI
+
+
+Currently to use the GUI you'll need to create your own encrypted manifest.
+You can easily create it with a text editor. Simply start with editing the sample
+JSON backup manifest that hidden-tahoe-backup comes with.
+
+After you have entered your Introducer FURL, root capability aliases and other backup
+metadata... you should then encrypt it with secretBox.py:
+
+```bash
+(virtenv-hidden-tahoe)amnesia@amnesia:~/Persistent/projects/hidden-tahoe-backup$ secretBox.py
+Must specify either encrypt or decrypt.
+usage: secretBox.py [-h] [--decrypt] [--encrypt] ...
+
+positional arguments:
+  args
+
+optional arguments:
+  -h, --help  show this help message and exit
+  --decrypt   perform secretBox decrypt operation
+  --encrypt   perform secretBox encrypt operation
+(virtenv-hidden-tahoe)amnesia@amnesia:~/Persistent/projects/hidden-tahoe-backup$ secretBox.py --encrypt testManifest.json > testManifest.json.secretbox 
+Enter passphrase:
+Enter passphrase:
+(virtenv-hidden-tahoe)amnesia@amnesia:~/Persistent/projects/hidden-tahoe-backup$
+```
+
+Currently the GTK GUI for hidden-tahoe-backup is called hiddenBackupGTK.py
+It should be in your path if you've pip installed this package into your python virtualenv.
+
 
 #### more technical details:
 
