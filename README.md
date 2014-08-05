@@ -185,7 +185,7 @@ After you have entered your Introducer FURL, root capability aliases and other b
 metadata... you should then encrypt it with secretBox.py:
 
 ```bash
-(virtenv-hidden-tahoe)amnesia@amnesia:~/Persistent/projects/hidden-tahoe-backup$ secretBox.py
+$ secretBox.py
 Must specify either encrypt or decrypt.
 usage: secretBox.py [-h] [--decrypt] [--encrypt] ...
 
@@ -196,13 +196,14 @@ optional arguments:
   -h, --help  show this help message and exit
   --decrypt   perform secretBox decrypt operation
   --encrypt   perform secretBox encrypt operation
-(virtenv-hidden-tahoe)amnesia@amnesia:~/Persistent/projects/hidden-tahoe-backup$ secretBox.py --encrypt testManifest.json > testManifest.json.secretbox 
+
+$ secretBox.py --encrypt testManifest.json > testManifest.json.secretbox
 Enter passphrase:
 Enter passphrase:
-(virtenv-hidden-tahoe)amnesia@amnesia:~/Persistent/projects/hidden-tahoe-backup$
+$
 ```
 
-Currently the GTK GUI for hidden-tahoe-backup is called hiddenBackupGTK.py
+Currently the GTK GUI for hidden-tahoe-backup is called **hiddenBackupGTK.py**
 It should be in your path if you've pip installed this package into your python virtualenv.
 
 
