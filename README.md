@@ -115,6 +115,66 @@ capability with another user. Knowledge of one file does not imply any knowledge
 in the grid.
 
 
+#### example using the CLI:
+
+```bash
+(virtenv-hidden-tahoe)amnesia@amnesia:~/Persistent/projects/hidden-tahoe-backup$ hiddenBackupCLI.py
+Must specific either backup or restore.
+usage: hiddenBackupCLI.py [-h] [--start] [--stop] [--restore] [--backup]
+                          [--manifest MANIFEST] [--node-directory NODEDIR]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --start               start Tahoe-LAFS client
+  --stop                stop Tahoe-LAFS client
+  --restore             restore
+  --backup              backup
+  --manifest MANIFEST   Backup manifest
+  --node-directory NODEDIR
+                        Specify which Tahoe node directory should be used.
+(virtenv-hidden-tahoe)amnesia@amnesia:~/Persistent/projects/hidden-tahoe-backup$
+(virtenv-hidden-tahoe)amnesia@amnesia:~/Persistent/projects/hidden-tahoe-backup$ hiddenBackupCLI.py --start --manifest testManifest.json.secretbox  --node-directory testNode
+Enter passphrase:
+watchTahoeCmd
+watching Tahoe command: tahoe create-client testNode
+Node created in '/home/amnesia/Persistent/projects/hidden-tahoe-backup/testNode'
+ Please set [client]introducer.furl= in tahoe.cfg!
+ The node cannot connect to a grid without it.
+ Please set [node]nickname= in tahoe.cfg
+watchTahoeCmd
+watching Tahoe command: usewithtor tahoe start testNode
+STARTING '/home/amnesia/Persistent/projects/hidden-tahoe-backup/testNode'
+(virtenv-hidden-tahoe)amnesia@amnesia:~/Persistent/projects/hidden-tahoe-backup$
+```
+
+You should now look at the local gateway node http interface.
+Usually Tahoe-LAFS clients set this server to listen on interface 127.0.0.1 port 3456.
+However in the case of Tails port 7657 is accessible from the browser because I2p uses this.
+If you don't use I2p with Tails then it should be no problem.
+
+Once this status web page indicates that you are connected to enough Tahoe-LAFS storage nodes then
+you can begin a backup or restore operation for example:
+
+```bash
+(virtenv-hidden-tahoe)amnesia@amnesia:~/Persistent/projects/hidden-tahoe-backup$ hiddenBackupCLI.py --restore --manifest testManifest.json.secretbox --node-directory testNode/
+Enter passphrase:
+watchTahoeCmd
+watching Tahoe command: tahoe cp -d testNode/ -v -r backup_test1:testDir1/Latest test2
+attaching sources to targets, 0 files / 1 dirs in root
+targets assigned, 0 dirs, 0 files
+starting copy, 0 files, 0 directories
+Success: files copied
+(virtenv-hidden-tahoe)amnesia@amnesia:~/Persistent/projects/hidden-tahoe-backup$
+(virtenv-hidden-tahoe)amnesia@amnesia:~/Persistent/projects/hidden-tahoe-backup$ hiddenBackupCLI.py --stop --manifest testManifest.json.secretbox --node-directory tes
+Enter passphrase:
+watchTahoeCmd
+watching Tahoe command: tahoe stop testNode/
+STOPPING '/home/amnesia/Persistent/projects/hidden-tahoe-backup/testNode'
+process 13612 is dead
+(virtenv-hidden-tahoe)amnesia@amnesia:~/Persistent/projects/hidden-tahoe-backup$
+```
+
+
 #### more technical details:
 
 * read my favorite white paper about Tahoe-LAFS: http://www.laser.dist.unige.it/Repository/IPI-1011/FileSystems/TahoeDFS.pdf
