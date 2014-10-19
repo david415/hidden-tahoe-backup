@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import scrypt
 import nacl.secret
 import nacl.utils
 import nacl.hash
@@ -13,7 +14,6 @@ import re
 
 
 def encryptFile(filename, key):
-    # XXX never reuse a nonce; is this good enough? yeeup.
     nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
     plaintext_fh = open(filename, 'r')
     plaintext = plaintext_fh.read()
@@ -55,7 +55,11 @@ def promptlyDecryptFile(filename):
     return decryptFile(filename, key)
 
 def hashPassphrase(passphrase):
-    return nacl.hash.sha256(passphrase, encoder=nacl.encoding.RawEncoder)
+    not_stretched = nacl.hash.sha256(passphrase, encoder=nacl.encoding.RawEncoder)
+    salt = not_stretched[:10] # XXX
+
+    # XXX sufficiently paranoid?
+    return scrypt.hash(not_stretched, salt, p=1000, r=20, N=2048, buflen=32)
 
 
 def main():
